@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="relative bg-gradient-to-br from-primary to-secondary overflow-hidden">
+    <div class="absolute inset-0 bg-black opacity-20"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-6">
+                Scale Your Instagram
+                <span class="text-yellow-300">Outreach</span>
+            </h1>
+            <p class="text-xl text-gray-200 mb-8 max-w-3xl mx-auto">
+                Send personalized bulk messages to your Instagram contacts with our professional automation platform. 
+                Perfect for businesses, marketers, and influencers.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="{{ url_for('register') }}" class="bg-white text-primary px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors">
+                    Start Free Trial
+                </a>
+                <a href="#features" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-primary transition-colors">
+                    Learn More
+                </a>
+            </div>
+            <p class="text-sm text-gray-300 mt-4">7-day free trial • No credit card required</p>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section id="features" class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Powerful Features for Professional Outreach
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Everything you need to run successful Instagram messaging campaigns at scale
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center p-6">
+                <div class="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-file-csv text-2xl text-primary"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">CSV Upload & Personalization</h3>
+                <p class="text-gray-600">Upload your contact list and create personalized messages using dynamic variables from your CSV data.</p>
+            </div>
+            
+            <div class="text-center p-6">
+                <div class="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-robot text-2xl text-primary"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Human-like Automation</h3>
+                <p class="text-gray-600">Advanced delays and human behavior simulation to avoid Instagram's spam detection systems.</p>
+            </div>
+            
+            <div class="text-center p-6">
+                <div class="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-chart-line text-2xl text-primary"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Real-time Analytics</h3>
+                <p class="text-gray-600">Track campaign progress, success rates, and performance metrics in real-time dashboard.</p>
+            </div>
+            
+            <div class="text-center p-6">
+                <div class="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-shield-alt text-2xl text-primary"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Account Safety</h3>
+                <p class="text-gray-600">Built-in safety measures and rate limiting to protect your Instagram account from blocks.</p>
+            </div>
+            
+            <div class="text-center p-6">
+                <div class="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-clock text-2xl text-primary"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Smart Scheduling</h3>
+                <p class="text-gray-600">Intelligent timing and delays between messages to maintain natural sending patterns.</p>
+            </div>
+            
+            <div class="text-center p-6">
+                <div class="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-headset text-2xl text-primary"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">24/7 Support</h3>
+                <p class="text-gray-600">Get help when you need it with our dedicated customer support team.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Section -->
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                Simple, Transparent Pricing
+            </h2>
+            <p class="text-xl text-gray-600">
+                One plan, unlimited possibilities
+            </p>
+        </div>
+        
+        <div class="max-w-md mx-auto">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-primary">
+                <div class="bg-primary text-white text-center py-4">
+                    <span class="text-sm font-semibold uppercase tracking-wide">Most Popular</span>
+                </div>
+                <div class="p-8">
+                    <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Pro Plan</h3>
+                        <div class="text-4xl font-bold text-gray-900 mb-2">
+                            $4.99<span class="text-lg text-gray-600">/month</span>
+                        </div>
+                        <p class="text-gray-600">Everything you need to scale your outreach</p>
+                    </div>
+                    
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Unlimited campaigns</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>CSV upload & personalization</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Real-time analytics</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>Account safety features</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>24/7 email support</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            <span>7-day free trial</span>
+                        </li>
+                    </ul>
+                    
+                    <a href="{{ url_for('register') }}" class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold text-center block hover:bg-primary/90 transition-colors">
+                        Start Free Trial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-primary">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+            Ready to Scale Your Instagram Outreach?
+        </h2>
+        <p class="text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+            Join thousands of businesses already using InstaBulk Pro to grow their Instagram presence
+        </p>
+        <a href="{{ url_for('register') }}" class="bg-white text-primary px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors">
+            Start Your Free Trial Today
+        </a>
+    </div>
+</section>
+{% endblock %}

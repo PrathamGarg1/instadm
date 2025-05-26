@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="text-center mb-16">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">Start Your Free Trial</h1>
+        <p class="text-xl text-gray-600">Enter your payment details to begin your 7-day free trial</p>
+        <p class="text-sm text-gray-500 mt-2">No charges until trial ends • Cancel anytime</p>
+    </div>
+    
+    <div class="max-w-md mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-primary">
+            <div class="bg-primary text-white text-center py-4">
+                <span class="text-sm font-semibold uppercase tracking-wide">7-Day Free Trial</span>
+            </div>
+            <div class="p-8">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">InstaBulk Pro</h3>
+                    <div class="text-4xl font-bold text-gray-900 mb-2">
+                        $4.99<span class="text-lg text-gray-600">/month</span>
+                    </div>
+                    <p class="text-gray-600">After 7-day free trial</p>
+                </div>
+                
+                <ul class="space-y-4 mb-8">
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>7-day free trial</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Unlimited campaigns</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>CSV upload & personalization</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Real-time analytics</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Account safety features</span>
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        <span>Cancel anytime</span>
+                    </li>
+                </ul>
+                
+                {% if session.user_id %}
+                    <button id="checkoutButton" class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors">
+                        Start Free Trial
+                    </button>
+                    <p class="text-xs text-gray-500 text-center mt-3">
+                        By clicking "Start Free Trial", you agree to provide payment details. 
+                        You won't be charged until your trial ends.
+                    </p>
+                {% else %}
+                    <a href="{{ url_for('register') }}" class="w-full bg-primary text-white py-3 px-6 rounded-lg font-semibold hover:bg-primary/90 transition-colors block text-center">
+                        Create Account & Start Trial
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if session.user_id %}
+<script>
+document.getElementById('checkoutButton').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/create-checkout', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        if (data.checkout_url) {
+            window.location.href = data.checkout_url;
+        } else {
+            alert('Failed to initiate checkout. Please try again later.');
+        }
+    } catch (error) {
+        alert('Error creating checkout. Please try again.');
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

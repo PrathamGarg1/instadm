@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}InstaBulk Pro{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="{{ url_for('landing') }}" class="flex items-center space-x-2">
+                        <i class="fab fa-instagram text-2xl text-primary"></i>
+                        <span class="text-xl font-bold text-gray-900">InstaBulk Pro</span>
+                    </a>
+                </div>
+                
+                <!-- PUT THE CODE HERE 👇 -->
+                <div class="flex items-center space-x-4">
+                    {% if session.user_id %}
+                        {% if session.picture %}
+                            <img src="{{ session.picture }}" alt="{{ session.name }}" class="w-8 h-8 rounded-full">
+                        {% endif %}
+                        <span class="text-gray-700">{{ session.name }}</span>
+                        <a href="{{ url_for('dashboard') }}" class="text-gray-700 hover:text-primary">Dashboard</a>
+                        <a href="{{ url_for('subscription_management') }}" class="text-gray-700 hover:text-primary">Subscription</a>
+                        <a href="{{ url_for('logout') }}" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90">Sign In with Google</a>
+                    {% endif %}
+                </div>
+                <!-- END OF CODE 👆 -->
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} bg-{% if category == 'error' %}red{% elif category == 'success' %}green{% else %}blue{% endif %}-100 border border-{% if category == 'error' %}red{% elif category == 'success' %}green{% else %}blue{% endif %}-400 text-{% if category == 'error' %}red{% elif category == 'success' %}green{% else %}blue{% endif %}-700 px-4 py-3 rounded mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fab fa-instagram text-2xl text-primary"></i>
+                        <span class="text-xl font-bold">InstaBulk Pro</span>
+                    </div>
+                    <p class="text-gray-400">Professional Instagram bulk messaging solution for businesses and marketers.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Product</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Features</a></li>
+                        <li><a href="#" class="hover:text-white">Pricing</a></li>
+                        <li><a href="#" class="hover:text-white">API</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Support</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Documentation</a></li>
+                        <li><a href="#" class="hover:text-white">Help Center</a></li>
+                        <li><a href="#" class="hover:text-white">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Legal</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-white">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 InstaBulk Pro. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Subscription Management</h1>
+        <p class="text-gray-600">Manage your InstaBulk Pro subscription and billing</p>
+    </div>
+
+    <!-- Subscription Status -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Current Plan</h2>
+        
+        {% if user_data and user_data[0] == 'active' %}
+            <div class="flex items-center mb-4">
+                <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                    ✅ Active Subscription
+                </div>
+            </div>
+            <p class="text-gray-600 mb-4">You have full access to all InstaBulk Pro features.</p>
+            {% if user_data[2] %}
+                <p class="text-sm text-gray-500">Next billing: {{ user_data[2][:10] }}</p>
+            {% endif %}
+        {% elif user_data and user_data[0] == 'on_trial' %}
+            <div class="flex items-center mb-4">
+                <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                    🔄 Free Trial Active
+                </div>
+            </div>
+            <p class="text-gray-600 mb-4">You're currently on a free trial with full access to InstaBulk Pro.</p>
+            {% if user_data[1] %}
+                <p class="text-sm text-gray-500">Trial ends: {{ user_data[1][:10] }}</p>
+            {% endif %}
+        {% else %}
+            <div class="flex items-center mb-4">
+                <div class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                    ❌ No Active Subscription
+                </div>
+            </div>
+            <p class="text-gray-600 mb-4">Subscribe to access InstaBulk Pro features.</p>
+            <a href="{{ url_for('pricing') }}" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90">
+                Subscribe Now
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Billing Management Portal -->
+    {% if user_data and user_data[3] %}
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Billing Management</h2>
+        <p class="text-gray-600 mb-4">Manage your subscription, update payment method, view invoices, or cancel subscription.</p>
+        
+        <div class="bg-blue-50 p-4 rounded-lg mb-4">
+            <h4 class="font-semibold text-blue-800 mb-2">How to Access Your Customer Portal:</h4>
+            <ol class="list-decimal list-inside text-blue-700 space-y-1">
+                <li>Click the button below to visit Lemon Squeezy</li>
+                <li>Enter your email: <strong>{{ session.email }}</strong></li>
+                <li>Check your email for a verification link</li>
+                <li>Access your subscription management portal</li>
+            </ol>
+        </div>
+        
+        <a href="https://app.lemonsqueezy.com/my-orders" target="_blank" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+            Manage Subscription on Lemon Squeezy
+        </a>
+    </div>
+    {% endif %}
+
+
+    <!-- Subscription History -->
+    {% if events %}
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Subscription History</h2>
+        <div class="space-y-3">
+            {% for event in events %}
+            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                <span class="text-gray-900">{{ event[0].replace('_', ' ').title() }}</span>
+                <span class="text-gray-500 text-sm">{{ event[1][:19] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
