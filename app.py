@@ -715,7 +715,7 @@ def create_checkout():
         }
         
         # Set redirect URL
-        NGROK_URL = "https://85ea-2409-40d1-1d-1c33-7c98-425d-4541-7bf3.ngrok-free.app"  # Update with your URL
+        NGROK_URL = os.environ.get('RENDER_EXTERNAL_URL', 'http://localhost:5000')
         redirect_url = f"{NGROK_URL}/payment-success"
         
         data = {
