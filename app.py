@@ -343,7 +343,7 @@ def subscription_required(f):
         conn = sqlite3.connect('app.db')
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT subscription_status, subscription_id, lemon_squeezy_customer_id, email 
+            SELECT subscription_status, subscription_id, trial_expires, subscription_expires, email 
             FROM users WHERE id = ?
         ''', (session['user_id'],))
         user = cursor.fetchone()
@@ -352,18 +352,29 @@ def subscription_required(f):
         if not user:
             return redirect(url_for('login'))
         
-        subscription_status, subscription_id, customer_id, email = user
-        print(f"🔍 User {email} has status: {subscription_status}, subscription_id: {subscription_id}")
+        subscription_status, subscription_id, trial_expires, subscription_expires, email = user
+        print(f"🔍 User {email} - Status: {subscription_status}, Sub ID: {subscription_id}")
         
-        # Allow access for trial and active subscriptions
-        if subscription_status in ['on_trial', 'active', 'cancelled', 'past_due']:
+        # Check if user has active subscription or trial
+        if subscription_status in ['on_trial', 'active', 'cancelled']:
+            # For trials, check if still valid
+            if subscription_status == 'on_trial' and trial_expires:
+                try:
+                    trial_end = datetime.fromisoformat(trial_expires.replace('Z', '+00:00'))
+                    if datetime.now() > trial_end:
+                        print(f"❌ Trial expired for {email}")
+                        flash('Your trial has expired. Please subscribe to continue.', 'warning')
+                        return redirect(url_for('pricing'))
+                except:
+                    pass
+            
             return f(*args, **kwargs)
         
+        print(f"❌ User {email} needs subscription - Status: {subscription_status}")
         flash('🔒 Please subscribe to start your free trial and access InstaBulk Pro.', 'warning')
         return redirect(url_for('pricing'))
     
     return decorated_function
-
 
 
 class InstagramBulkMessenger:
@@ -818,60 +829,48 @@ def webhook():
     except Exception as e:
         print(f"Webhook Error: {str(e)}")
         return jsonify({'error': str(e)}), 500
-    
+
+
 def handle_subscription_created(event_data):
     """Handle new subscription creation with improved user matching"""
     try:
         subscription = event_data['data']
         attributes = subscription['attributes']
 
-        # Get user identification from multiple sources
-        custom_data = attributes.get('custom_data', {})
-        user_id = custom_data.get('user_id')
-        user_email = custom_data.get('user_email') or attributes.get('user_email')
+        # Get customer email from subscription
         customer_email = attributes.get('customer_email')
+        subscription_id = subscription['id']
+        status = attributes['status']
+        customer_id = attributes['customer_id']
+        trial_ends_at = attributes.get('trial_ends_at')
+        ends_at = attributes.get('ends_at')
 
-        print(f"🔍 Subscription created - User ID: {user_id}, Email: {user_email or customer_email}")
+        print(f"🔍 Processing subscription for email: {customer_email}")
 
-        # Find user by multiple methods
+        if not customer_email:
+            print("❌ No customer email found in subscription")
+            return
+
         conn = sqlite3.connect('app.db')
         cursor = conn.cursor()
 
-        target_user_id = None
+        # Find user by email (most reliable method)
+        cursor.execute('SELECT id, email FROM users WHERE email = ?', (customer_email,))
+        user = cursor.fetchone()
 
-        # Method 1: Direct user_id match
-        if user_id:
-            cursor.execute('SELECT id FROM users WHERE id = ?', (user_id,))
-            result = cursor.fetchone()
-            if result:
-                target_user_id = result[0]  # Extract the ID from tuple
-                print(f"✅ Found user by ID: {target_user_id}")
-
-        # Method 2: Email match
-        if not target_user_id and (user_email or customer_email):
-            email_to_search = user_email or customer_email
-            cursor.execute('SELECT id FROM users WHERE email = ?', (email_to_search,))
-            result = cursor.fetchone()
-            if result:
-                target_user_id = result[0]  # Extract the ID from tuple
-                print(f"✅ Found user by email: {target_user_id}")
-
-        if not target_user_id:
-            print(f"❌ No user found for subscription {subscription['id']}")
-            # List all users for debugging
+        if not user:
+            print(f"❌ No user found with email: {customer_email}")
+            # List existing users for debugging
             cursor.execute('SELECT id, email FROM users')
             all_users = cursor.fetchall()
-            print(f"🔍 Available users: {all_users}")
+            print(f"🔍 Existing users: {all_users}")
             conn.close()
             return
 
-        # Update user subscription
-        subscription_id = subscription['id']
-        customer_id = attributes['customer_id']
-        status = attributes['status']
-        trial_ends_at = attributes.get('trial_ends_at')
-        ends_at = attributes['ends_at']
+        user_id = user[0]
+        print(f"✅ Found user {user_id} for email {customer_email}")
 
+        # Update user with subscription details
         cursor.execute('''
             UPDATE users 
             SET subscription_status = ?, 
@@ -880,21 +879,25 @@ def handle_subscription_created(event_data):
                 subscription_expires = ?,
                 trial_expires = ?
             WHERE id = ?
-        ''', (status, subscription_id, customer_id, ends_at, trial_ends_at, target_user_id))
+        ''', (status, subscription_id, customer_id, ends_at, trial_ends_at, user_id))
 
+        # Verify the update
+        cursor.execute('SELECT email, subscription_status, subscription_id FROM users WHERE id = ?', (user_id,))
+        updated_user = cursor.fetchone()
+        
         # Log the event
         cursor.execute('''
             INSERT INTO subscription_events (user_id, event_type, lemon_squeezy_subscription_id, event_data)
             VALUES (?, ?, ?, ?)
-        ''', (target_user_id, 'subscription_created', subscription_id, json.dumps(event_data)))
+        ''', (user_id, 'subscription_created', subscription_id, json.dumps(event_data)))
 
         conn.commit()
         conn.close()
 
-        print(f"✅ Subscription {subscription_id} created for user {target_user_id} with status: {status}")
+        print(f"✅ User {updated_user[0]} updated - Status: {updated_user[1]}, Sub ID: {updated_user[2]}")
 
     except Exception as e:
-        print(f"❌ Error handling subscription_created: {str(e)}")
+        print(f"❌ Error in handle_subscription_created: {str(e)}")
         import traceback
         traceback.print_exc()
 
