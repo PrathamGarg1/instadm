@@ -401,12 +401,29 @@ class InstagramBulkMessenger:
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
         
-        self.driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install()),
-            options=chrome_options
-        )
-        self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-        self.wait = WebDriverWait(self.driver, 20)
+        try:
+            # Get Chrome driver path with validation
+            print("🔍 Installing ChromeDriver...")
+            chrome_driver_path = ChromeDriverManager().install()
+            
+            if chrome_driver_path is None:
+                raise Exception("ChromeDriverManager returned None")
+            
+            print(f"✅ ChromeDriver path: {chrome_driver_path}")
+            
+            # Create service with validation
+            service = Service(chrome_driver_path)
+            
+            # Create WebDriver
+            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+            self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+            self.wait = WebDriverWait(self.driver, 20)
+            
+            print("✅ WebDriver created successfully")
+            
+        except Exception as driver_error:
+            print(f"❌ Error creating WebDriver: {str(driver_error)}")
+            raise Exception(f"Failed to initialize WebDriver: {str(driver_error)}")
 
     def human_type(self, element, text, delay_range=(0.1, 0.3)):
         for char in text:
