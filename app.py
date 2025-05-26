@@ -388,6 +388,9 @@ class InstagramBulkMessenger:
         self.status = "initializing"
         self.progress = 0
         self.results = {"successful": 0, "failed": 0, "total": len(csv_data)}
+
+        if not self.message_template.strip():
+            raise ValueError("Message template cannot be empty")
         
         # Setup Chrome options
         chrome_options = Options()
@@ -411,12 +414,18 @@ class InstagramBulkMessenger:
             time.sleep(random.uniform(*delay_range))
 
     def personalize_message(self, row):
+        """Replace variables in message template with CSV data"""
+        if not self.message_template:
+            return "Default message"  # Fallback
+            
         message = self.message_template
         for column, value in row.items():
             placeholder = "{" + str(column) + "}"
-            message = message.replace(placeholder, str(value))
+            # Handle None values in CSV data
+            replacement_value = str(value) if value is not None else ""
+            message = message.replace(placeholder, replacement_value)
         return message
-
+    
     def handle_popup_screens(self):
         popup_handlers = [
             ("//button[contains(text(), 'Not Now')]", "Notifications popup"),
@@ -1286,28 +1295,66 @@ def upload_csv():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
 @app.route('/start_campaign', methods=['POST'])
 @subscription_required
 def start_campaign():
     try:
         data = request.json
         
+        # Enhanced validation with detailed error messages
         required_fields = ['file_id', 'instagram_username', 'instagram_password', 'message_template']
+        
+        print(f"🔍 Received campaign data: {data}")  # Debug
+        
+        # Check for missing fields
         for field in required_fields:
             if field not in data:
+                print(f"❌ Missing field: {field}")
                 return jsonify({"error": f"Missing required field: {field}"}), 400
+            
+            # Check for None or empty values
+            if data[field] is None or data[field] == '':
+                print(f"❌ Empty/None field: {field}")
+                return jsonify({"error": f"Field '{field}' cannot be empty"}), 400
+        
+        # Additional validation for message template
+        message_template = data['message_template'].strip()
+        if not message_template:
+            print("❌ Message template is empty after stripping")
+            return jsonify({"error": "Message template cannot be empty"}), 400
+        
+        print(f"✅ All fields validated successfully")
         
         file_id = data['file_id']
         csv_file = None
+        
+        # Find CSV file
         for filename in os.listdir(app.config['UPLOAD_FOLDER']):
             if filename.startswith(file_id):
                 csv_file = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 break
         
         if not csv_file:
+            print(f"❌ CSV file not found for file_id: {file_id}")
             return jsonify({"error": "CSV file not found"}), 404
         
-        df = pd.read_csv(csv_file)
+        print(f"✅ Found CSV file: {csv_file}")
+        
+        # Load and validate CSV
+        try:
+            df = pd.read_csv(csv_file)
+            if df.empty:
+                return jsonify({"error": "CSV file is empty"}), 400
+            
+            if 'instagram_handle' not in df.columns:
+                return jsonify({"error": "CSV must contain 'instagram_handle' column"}), 400
+                
+            print(f"✅ CSV loaded successfully with {len(df)} rows")
+            
+        except Exception as e:
+            print(f"❌ Error loading CSV: {str(e)}")
+            return jsonify({"error": f"Error loading CSV file: {str(e)}"}), 400
         
         campaign_id = str(uuid.uuid4())
         
@@ -1317,22 +1364,28 @@ def start_campaign():
         cursor.execute('''
             INSERT INTO campaigns (id, user_id, status, total_recipients, message_template)
             VALUES (?, ?, ?, ?, ?)
-        ''', (campaign_id, session['user_id'], 'initializing', len(df), data['message_template']))
+        ''', (campaign_id, session['user_id'], 'initializing', len(df), message_template))
         conn.commit()
         conn.close()
         
+        print(f"✅ Campaign {campaign_id} saved to database")
+        
+        # Create messenger instance
         messenger = InstagramBulkMessenger(
             username=data['instagram_username'],
             password=data['instagram_password'],
             csv_data=df,
-            message_template=data['message_template'],
+            message_template=message_template,
             campaign_id=campaign_id,
             user_id=session['user_id']
         )
         
+        # Start campaign in background thread
         thread = threading.Thread(target=messenger.run_campaign)
         thread.daemon = True
         thread.start()
+        
+        print(f"✅ Campaign {campaign_id} started successfully")
         
         return jsonify({
             "success": True,
@@ -1341,7 +1394,12 @@ def start_campaign():
         })
         
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"❌ Campaign start error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
+
+
 
 @app.route('/campaign_status/<campaign_id>')
 @login_required

@@ -390,10 +390,29 @@ function startCampaign() {
     const password = document.getElementById('instagramPassword').value;
     const messageTemplate = document.getElementById('messageTemplate').value;
 
+    // Client-side validation
     if (!username || !password || !messageTemplate) {
         alert('Please fill in all fields');
         return;
     }
+
+    if (!fileId) {
+        alert('Please upload a CSV file first');
+        return;
+    }
+
+    // Ensure message template is not empty
+    if (messageTemplate.trim() === '') {
+        alert('Message template cannot be empty');
+        return;
+    }
+
+    console.log('Starting campaign with data:', {
+        file_id: fileId,
+        instagram_username: username,
+        instagram_password: password,
+        message_template: messageTemplate
+    });
 
     fetch('/start_campaign', {
         method: 'POST',
@@ -417,9 +436,11 @@ function startCampaign() {
         }
     })
     .catch(error => {
+        console.error('Campaign start failed:', error);
         alert('Campaign start failed: ' + error);
     });
 }
+
 
 function startProgressTracking() {
     const interval = setInterval(() => {
